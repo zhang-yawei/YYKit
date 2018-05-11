@@ -141,9 +141,10 @@ static void ContainerObjectExample() {
              @"content":@"c",
              @"time":@"t"};
 }
-- (void)modelCustomTransformFromDictionary:(NSDictionary *)dic {
+- (BOOL)modelCustomTransformFromDictionary:(NSDictionary *)dic {
     uint64_t timestamp = [dic unsignedLongLongValueForKey:@"t" default:0];
     self.time = [NSDate dateWithTimeIntervalSince1970:timestamp / 1000.0];
+    return YES;
 }
 - (void)modelCustomTransformToDictionary:(NSMutableDictionary *)dic {
     dic[@"t"] = @([self.time timeIntervalSince1970] * 1000).description;
@@ -204,7 +205,7 @@ static void CodingCopyingHashEqualExample() {
     self.view.backgroundColor = [UIColor whiteColor];
     UILabel *label = [UILabel new];
     label.size = CGSizeMake(kScreenWidth, 30);
-    label.centerY = self.view.height / 2;
+    label.centerY = self.view.height / 2 - (kiOS7Later ? 0 : 32);
     label.textAlignment = NSTextAlignmentCenter;
     label.text = @"See code in YYModelExample.m";
     [self.view addSubview:label];

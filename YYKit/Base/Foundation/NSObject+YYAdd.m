@@ -114,9 +114,9 @@ return @(ret); \
         };
             
         case '@': { // id
-            id ret = nil;
+            void *ret;
             [inv getReturnValue:&ret];
-            return ret;
+            return (__bridge id)(ret);
         };
             
         case '#': { // Class
@@ -181,7 +181,7 @@ return @(ret); \
                 double arg = va_arg(args, double);
                 float argf = arg;
                 [inv setArgument:&argf atIndex:index];
-            }
+            } break;
                 
             case 'd': // 8: double / CGFloat(64bit)
             {
@@ -315,8 +315,8 @@ else if (size <= 4 * _size_ ) { \
     }
 }
 
-- (void)performSelector:(SEL)selector afterDelay:(NSTimeInterval)delay {
-    [self performSelector:selector withObject:nil afterDelay:delay];
+- (void)performSelector:(SEL)sel afterDelay:(NSTimeInterval)delay {
+    [self performSelector:sel withObject:nil afterDelay:delay];
 }
 
 + (BOOL)swizzleInstanceMethod:(SEL)originalSel with:(SEL)newSel {

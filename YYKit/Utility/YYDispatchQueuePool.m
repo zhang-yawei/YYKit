@@ -30,7 +30,7 @@ static inline qos_class_t NSQualityOfServiceToQOSClass(NSQualityOfService qos) {
     switch (qos) {
         case NSQualityOfServiceUserInteractive: return QOS_CLASS_USER_INTERACTIVE;
         case NSQualityOfServiceUserInitiated: return QOS_CLASS_USER_INITIATED;
-        case NSQualityOfServiceUtility: return QOS_CLASS_USER_INITIATED;
+        case NSQualityOfServiceUtility: return QOS_CLASS_UTILITY;
         case NSQualityOfServiceBackground: return QOS_CLASS_BACKGROUND;
         case NSQualityOfServiceDefault: return QOS_CLASS_DEFAULT;
         default: return QOS_CLASS_UNSPECIFIED;
@@ -93,8 +93,7 @@ static void YYDispatchContextRelease(YYDispatchContext *context) {
 }
 
 static dispatch_queue_t YYDispatchContextGetQueue(YYDispatchContext *context) {
-    int32_t counter = OSAtomicIncrement32(&context->counter);
-    if (counter < 0) counter = -counter;
+    uint32_t counter = (uint32_t)OSAtomicIncrement32(&context->counter);
     void *queue = context->queues[counter % context->queueCount];
     return (__bridge dispatch_queue_t)(queue);
 }

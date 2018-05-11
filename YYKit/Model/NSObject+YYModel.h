@@ -11,6 +11,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  Provide some data-model method:
  
@@ -24,6 +26,7 @@
  Sample Code:
     
      ********************** json convertor *********************
+ @code
      @interface YYAuthor : NSObject
      @property (nonatomic, strong) NSString *name;
      @property (nonatomic, assign) NSDate *birthday;
@@ -47,8 +50,11 @@
          NSString *json = [book modelToJSONString];
          // {"author":{"name":"J.K.Rowling","birthday":"1965-07-31T00:00:00+0000"},"name":"Harry Potter","pages":256}
      }
+ @endcode
+ 
  
      ********************** Coding/Copying/hash/equal *********************
+ @code
      @interface YYShadow :NSObject <NSCoding, NSCopying>
      @property (nonatomic, copy) NSString *name;
      @property (nonatomic, assign) CGSize size;
@@ -56,11 +62,12 @@
  
      @implementation YYShadow
      - (void)encodeWithCoder:(NSCoder *)aCoder { [self modelEncodeWithCoder:aCoder]; }
-     - (id)initWithCoder:(NSCoder *)aDecoder { return [self modelInitWithCoder:aDecoder]; }
+     - (id)initWithCoder:(NSCoder *)aDecoder { self = [super init]; return [self modelInitWithCoder:aDecoder]; }
      - (id)copyWithZone:(NSZone *)zone { return [self modelCopy]; }
      - (NSUInteger)hash { return [self modelHash]; }
      - (BOOL)isEqual:(id)object { return [self modelIsEqual:object]; }
      @end
+ @endcode
  
  */
 @interface NSObject (YYModel)
@@ -73,7 +80,7 @@
  
  @return A new instance created from the json, or nil if an error occurs.
  */
-+ (instancetype)modelWithJSON:(id)json;
++ (nullable instancetype)modelWithJSON:(id)json;
 
 /**
  Creates and returns a new instance of the receiver from a key-value dictionary.
@@ -94,7 +101,7 @@
      `NSValue` -> struct or union, such as CGRect, CGSize, ...
      `NSString` -> SEL, Class.
  */
-+ (instancetype)modelWithDictionary:(NSDictionary *)dictionary;
++ (nullable instancetype)modelWithDictionary:(NSDictionary *)dictionary;
 
 /**
  Set the receiver's properties with a json object.
@@ -138,7 +145,7 @@
  If the reciver is `NSArray`, `NSDictionary` or `NSSet`, it just convert
  the inner object to json object.
  */
-- (id)modelToJSONObject;
+- (nullable id)modelToJSONObject;
 
 /**
  Generate a json string's data from the receiver's properties.
@@ -149,7 +156,7 @@
  If the reciver is `NSArray`, `NSDictionary` or `NSSet`, it will also convert the 
  inner object to json string.
  */
-- (NSData *)modelToJSONData;
+- (nullable NSData *)modelToJSONData;
 
 /**
  Generate a json string from the receiver's properties.
@@ -160,14 +167,14 @@
  If the reciver is `NSArray`, `NSDictionary` or `NSSet`, it will also convert the 
  inner object to json string.
  */
-- (NSString *)modelToJSONString;
+- (nullable NSString *)modelToJSONString;
 
 /**
  Copy a instance with the receiver's properties.
  
  @return A copied instance, or nil if an error occurs.
  */
-- (id)modelCopy;
+- (nullable id)modelCopy;
 
 /**
  Encode the receiver's properties to a coder.
@@ -201,6 +208,13 @@
  */
 - (BOOL)modelIsEqual:(id)model;
 
+/**
+ Description method for debugging purposes based on properties.
+ 
+ @return A string that describes the contents of the receiver.
+ */
+- (NSString *)modelDescription;
+
 @end
 
 
@@ -216,11 +230,11 @@
  
  @param cls  The instance's class in array.
  @param json  A json array of `NSArray`, `NSString` or `NSData`.
-              Example: [{"name","Mary"},{name:"Joe"}]
+              Example: [{"name":"Mary"},{name:"Joe"}]
  
  @return A array, or nil if an error occurs.
  */
-+ (NSArray *)modelArrayWithClass:(Class)cls json:(id)json;
++ (nullable NSArray *)modelArrayWithClass:(Class)cls json:(id)json;
 
 @end
 
@@ -239,9 +253,9 @@
  @param json  A json dictionary of `NSDictionary`, `NSString` or `NSData`.
               Example: {"user1":{"name","Mary"}, "user2": {name:"Joe"}}
  
- @return A array, or nil if an error occurs.
+ @return A dictionary, or nil if an error occurs.
  */
-+ (NSDictionary *)modelDictionaryWithClass:(Class)cls json:(id)json;
++ (nullable NSDictionary *)modelDictionaryWithClass:(Class)cls json:(id)json;
 @end
 
 
@@ -267,28 +281,33 @@
             "n":"Harry Pottery",
             "p": 256,
             "ext" : {
-                "desc" : "A book written by J.K.Rowing."
-            }
+                "desc" : "A book written by J.K.Rowling."
+            },
+            "ID" : 100010
         }
  
     model:
+    @code
         @interface YYBook : NSObject
         @property NSString *name;
         @property NSInteger page;
         @property NSString *desc;
+        @property NSString *bookID;
         @end
- 
+        
         @implementation YYBook
         + (NSDictionary *)modelCustomPropertyMapper {
-            return @{@"name" : @"n",
-                     @"page" : @"p",
-                     @"desc" : @"ext.desc"};
+            return @{@"name"  : @"n",
+                     @"page"  : @"p",
+                     @"desc"  : @"ext.desc",
+                     @"bookID": @[@"id", @"ID", @"book_id"]};
         }
         @end
+    @endcode
  
  @return A custom mapper for properties.
  */
-+ (NSDictionary *)modelCustomPropertyMapper;
++ (nullable NSDictionary<NSString *, id> *)modelCustomPropertyMapper;
 
 /**
  The generic class mapper for container properties.
@@ -298,6 +317,7 @@
  object will be add to the array/set/dictionary.
  
   Example:
+  @code
         @class YYShadow, YYBorder, YYAttachment;
  
         @interface YYAttributes
@@ -314,26 +334,77 @@
                      @"attachments" : @"YYAttachment" };
         }
         @end
+ @endcode
  
  @return A class mapper.
  */
-+ (NSDictionary *)modelContainerPropertyGenericClass;
++ (nullable NSDictionary<NSString *, id> *)modelContainerPropertyGenericClass;
+
+/**
+ If you need to create instances of different classes during json->object transform,
+ use the method to choose custom class based on dictionary data.
+ 
+ @discussion If the model implements this method, it will be called to determine resulting class
+ during `+modelWithJSON:`, `+modelWithDictionary:`, conveting object of properties of parent objects 
+ (both singular and containers via `+modelContainerPropertyGenericClass`).
+ 
+ Example:
+ @code
+        @class YYCircle, YYRectangle, YYLine;
+ 
+        @implementation YYShape
+
+        + (Class)modelCustomClassForDictionary:(NSDictionary*)dictionary {
+            if (dictionary[@"radius"] != nil) {
+                return [YYCircle class];
+            } else if (dictionary[@"width"] != nil) {
+                return [YYRectangle class];
+            } else if (dictionary[@"y2"] != nil) {
+                return [YYLine class];
+            } else {
+                return [self class];
+            }
+        }
+
+        @end
+ @endcode
+
+ @param dictionary The json/kv dictionary.
+ 
+ @return Class to create from this dictionary, `nil` to use current class.
+
+ */
++ (nullable Class)modelCustomClassForDictionary:(NSDictionary *)dictionary;
 
 /**
  All the properties in blacklist will be ignored in model transform process.
  Returns nil to ignore this feature.
  
- @return An array of property's name (Array<NSString>).
+ @return An array of property's name.
  */
-+ (NSArray *)modelPropertyBlacklist;
++ (nullable NSArray<NSString *> *)modelPropertyBlacklist;
 
 /**
  If a property is not in the whitelist, it will be ignored in model transform process.
  Returns nil to ignore this feature.
  
- @return An array of property's name (Array<NSString>).
+ @return An array of property's name.
  */
-+ (NSArray *)modelPropertyWhitelist;
++ (nullable NSArray<NSString *> *)modelPropertyWhitelist;
+
+/**
+ This method's behavior is similar to `- (BOOL)modelCustomTransformFromDictionary:(NSDictionary *)dic;`, 
+ but be called before the model transform.
+ 
+ @discussion If the model implements this method, it will be called before
+ `+modelWithJSON:`, `+modelWithDictionary:`, `-modelSetWithJSON:` and `-modelSetWithDictionary:`.
+ If this method returns nil, the transform process will ignore this model.
+ 
+ @param dic  The json/kv dictionary.
+ 
+ @return Returns the modified dictionary, or nil to ignore this model.
+ */
+- (NSDictionary *)modelCustomWillTransformFromDictionary:(NSDictionary *)dic;
 
 /**
  If the default json-to-model transform does not fit to your model object, implement
@@ -366,3 +437,5 @@
 - (BOOL)modelCustomTransformToDictionary:(NSMutableDictionary *)dic;
 
 @end
+
+NS_ASSUME_NONNULL_END

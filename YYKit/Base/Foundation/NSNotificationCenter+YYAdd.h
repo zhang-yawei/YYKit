@@ -11,6 +11,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  Provide some method for `NSNotificationCenter`
  to post notification in different thread.
@@ -19,8 +21,8 @@
 
 /**
  Posts a given notification to the receiver on main thread.
- If current thread is main thread, the notification is posted synchronized;
- otherwise, is posted asynchronized.
+ If current thread is main thread, the notification is posted synchronously;
+ otherwise, is posted asynchronously.
  
  @param notification  The notification to post.
                       An exception is raised if notification is nil.
@@ -45,19 +47,19 @@
 /**
  Creates a notification with a given name and sender and posts it to the 
  receiver on main thread. If current thread is main thread, the notification 
- is posted synchronized; otherwise, is posted asynchronized.
+ is posted synchronously; otherwise, is posted asynchronously.
  
  @param name    The name of the notification.
  
  @param object  The object posting the notification.
  */
 - (void)postNotificationOnMainThreadWithName:(NSString *)name
-                                      object:(id)object;
+                                      object:(nullable id)object;
 
 /**
  Creates a notification with a given name and sender and posts it to the
  receiver on main thread. If current thread is main thread, the notification
- is posted synchronized; otherwise, is posted asynchronized.
+ is posted synchronously; otherwise, is posted asynchronously.
  
  @param name      The name of the notification.
  
@@ -66,8 +68,8 @@
  @param userInfo  Information about the the notification. May be nil.
  */
 - (void)postNotificationOnMainThreadWithName:(NSString *)name
-                                      object:(id)object
-                                    userInfo:(NSDictionary *)userInfo;
+                                      object:(nullable id)object
+                                    userInfo:(nullable NSDictionary *)userInfo;
 
 /**
  Creates a notification with a given name and sender and posts it to the
@@ -86,8 +88,10 @@
                  immediately.
  */
 - (void)postNotificationOnMainThreadWithName:(NSString *)name
-                                      object:(id)object
-                                    userInfo:(NSDictionary *)userInfo
+                                      object:(nullable id)object
+                                    userInfo:(nullable NSDictionary *)userInfo
                                waitUntilDone:(BOOL)wait;
 
 @end
+
+NS_ASSUME_NONNULL_END
