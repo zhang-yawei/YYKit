@@ -30,6 +30,10 @@ static void YYRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopAc
 #pragma clang diagnostic pop
     }];
 }
+/*
+ 注册一个RunloopObserver，监听MainRunloop在kCFRunLoopCommonModes（包含kCFRunLoopDefaultMode、UITrackingRunLoopMode）下的kCFRunLoopBeforeWaiting和kCFRunLoopExit的状态，也就是说在一次Runloop空闲时去执行更新显示的操作。
+ 
+ */
 
 static void YYTransactionSetup() {
     static dispatch_once_t onceToken;
